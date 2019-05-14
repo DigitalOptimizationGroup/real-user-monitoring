@@ -1,15 +1,12 @@
 import { logImage } from "./image-get-logger";
 
 export type ERRORS = {
-  rid: string;
-  vid: string;
-  startTimestamp: string;
-  clientTime: string;
   msg: string;
 };
 
+const maxErrorsToLog = 10;
 var i = 0;
-export const logErrors = (loggingUrl: string, maxErrorsToLog: number = 10) => (
+export const logErrors = (
   msg: string,
   url: string,
   line: number,
@@ -21,10 +18,6 @@ export const logErrors = (loggingUrl: string, maxErrorsToLog: number = 10) => (
     i++;
 
     const ErrorToLog: ERRORS = {
-      rid: window.__APP_CONFIG__.rid,
-      vid: window.__APP_CONFIG__.vid,
-      startTimestamp: window.__APP_CONFIG__.startTimestamp.toString(),
-      clientTime: window.performance && window.performance.now().toString(),
       msg: window.btoa(
         JSON.stringify({
           type: "ERROR",
@@ -45,3 +38,6 @@ export const logErrors = (loggingUrl: string, maxErrorsToLog: number = 10) => (
     return suppressErrorAlert;
   }
 };
+
+// catch and track errors
+window.onerror = logErrors;
