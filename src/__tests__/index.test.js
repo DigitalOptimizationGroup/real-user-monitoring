@@ -98,7 +98,7 @@ it("works", () => {
     }
   ];
 
-  require("./index");
+  require("../index");
 
   expect(global.Image.mock.instances).toEqual([
     { src: "http://localhost/PING?rid=123&vid=abc&lang=en-US" },

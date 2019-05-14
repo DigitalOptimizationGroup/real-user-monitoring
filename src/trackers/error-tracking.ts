@@ -1,4 +1,4 @@
-import { logImage } from "./image-get-logger";
+import { logImage } from "./gif-logger";
 
 export type ERRORS = {
   msg: string;

@@ -1,24 +1,13 @@
-import ttiPolyfill from "tti-polyfill";
-import { logImage } from "./image-get-logger";
-
-
-const sendPerfTiming = (t: string, v: number) =>{
-    const event = {
-        t,
-        value: window.encodeURIComponent(v)
-    }    
-    
-    logImage("performance", event)
-}
+import { sendPerfTiming } from "./log-performance";
+import { logImage } from "./gif-logger";
 
 var timeToFistByteLogged: boolean,
   dnsLookupTimeLogged: boolean,
   timeToFetchStartLogged: boolean,
   timeToHtmlPageLogged: boolean,
   domInteractiveLogged: boolean;
-var attempts = 0;
 
-function checkTiming() {
+const checkTiming = () => {
   var perfData = window.performance.timing;
 
   // Navigation to fetch start
@@ -71,13 +60,13 @@ function checkTiming() {
     var entries = window.performance.getEntries();
 
     var assetTiming = entries
-      .filter(function(entry) {
+      .filter(entry => {
         return (
           // filter out everything (including images) except css and js
           entry.name.includes(".js") || entry.name.includes(".css")
         );
       })
-      .map(function(entry) {
+      .map((entry: PerformanceResourceTiming) => {
         return {
           protocol: entry.nextHopProtocol,
           asset: entry.name,
@@ -89,39 +78,24 @@ function checkTiming() {
         };
       });
 
+    logImage("asset-load-times", { assets: JSON.stringify(assetTiming) });
 
-    logImage("asset-load-times", {assets: JSON.stringify(assetTiming)})
-    
-    const paintTypes: {[key: string]: string} = {
-        "first-contentful-paint": "firstContentfulPaint",
-        "first-paint": "firstPaint"
-    }
-    
+    const paintTypes: { [key: string]: string } = {
+      "first-contentful-paint": "firstContentfulPaint",
+      "first-paint": "firstPaint"
+    };
+
     // paint timings
     entries
       .filter(function(entry) {
         return entry.entryType === "paint";
       })
       .forEach(function(entry) {
-          logImage("performance", {
-              t: paintTypes[entry.name],
-              v: entry.startTime.toString()
-          })
+        sendPerfTiming(paintTypes[entry.name], entry.startTime);
       });
   }
+};
 
-  attempts++;
-  if (attempts > 35) {
-    sendPerfTiming("timeoutTimingLookups", true);
-    clearInterval(checkTimingsAvailable);
-  }
-}
+const checkTimingsAvailable = setInterval(checkTiming, 1000);
 
-var checkTimingsAvailable = setInterval(checkTiming, 1000);
 checkTiming();
-
-// the tti pollyfill
-ttiPolyfill.getFirstConsistentlyInteractive({}).then(tti => {
-  sendPerfTiming("tti", tti > 1 ? tti : "NA");
-  document.removeEventListener("visibilitychange", window.__trackAbandons);
-});

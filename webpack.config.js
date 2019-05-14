@@ -1,17 +1,41 @@
+// module.exports = {
+//   entry: { "embed-in-head": "./src/head-embeds.ts" },
+//   module: {
+//     rules: [
+//       {
+//         test: /\.js|.ts$/,
+//         exclude: /(node_modules)/,
+//         use: {
+//           loader: "ts-loader"
+//         }
+//       }
+//     ]
+//   },
+//   resolve: {
+//     extensions: [".ts", ".js"]
+//   }
+// };
+
 module.exports = {
-  entry: { perf: "./src" },
+  entry: {
+    perf: "./src/body-script.ts",
+    head: "./src/head-embeds.ts"
+  },
   module: {
     rules: [
       {
-        test: /\.js$/,
+        test: /\.js|.ts$/,
         exclude: /(node_modules)/,
         use: {
-          loader: "babel-loader",
-          options: {
-            presets: [["@babel/preset-env"]]
-          }
+          loader: "ts-loader"
         }
       }
     ]
+  },
+  resolve: {
+    extensions: [".ts", ".js"]
+  },
+  output: {
+    filename: "[name].[chunkhash].js"
   }
 };

@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "jest --watch",
-    "build": "tsc"
+    "build": "webpack"
   },
   "author": "Digital Optimization Group LLC",
   "license": "MIT",
@@ -21,9 +21,13 @@
     "jest": "^24.8.0",
     "jest-express": "^1.10.0",
     "ts-jest": "^24.0.0",
-    "typescript": "^3.4.5"
+    "ts-loader": "^6.0.0",
+    "typescript": "^3.4.5",
+    "webpack": "^4.31.0",
+    "webpack-cli": "^3.3.2"
   },
   "dependencies": {
-    "tti-polyfill": "^0.2.2"
+    "tti-polyfill": "^0.2.2",
+    "first-input-delay": "^0.1.3"
   }
 }
