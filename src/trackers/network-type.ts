@@ -1,5 +1,5 @@
 type ConnectionType = {
-  connection: { effectiveType: string };
+  connection: { effectiveType: "slow-2g" | "2g" | "3g" | "4g" };
 };
 
 const navigator: ConnectionType = window.navigator as any;
