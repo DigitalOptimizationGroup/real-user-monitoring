@@ -1,5 +1,14 @@
-import { sendPerfTiming } from "./log-performance";
-import { logImage } from "./gif-logger";
+import { logPerformance } from "./log-performance";
+import { logImage, BasePerfEvent } from "./gif-logger";
+import { EventType } from "./gif-logger";
+
+export interface AssetTiming extends BasePerfEvent {
+  type: EventType.AssetLoadTime;
+  protocol: PerformanceResourceTiming["nextHopProtocol"];
+  asset: PerformanceResourceTiming["name"];
+  time: string;
+  dns: string;
+}
 
 var timeToFistByteLogged: boolean,
   dnsLookupTimeLogged: boolean,
@@ -13,39 +22,35 @@ const checkTiming = () => {
   // Navigation to fetch start
   if (perfData.fetchStart > 0 && !timeToFetchStartLogged) {
     var timeToFetchStart = perfData.fetchStart - perfData.navigationStart;
-    sendPerfTiming("timeToFetchStart", timeToFetchStart);
+    logPerformance("timeToFetchStart", timeToFetchStart);
     timeToFetchStartLogged = true;
   }
 
   // DNS query time
   if (perfData.domainLookupEnd > 0 && !dnsLookupTimeLogged) {
     var dnsLookupTime = perfData.domainLookupEnd - perfData.domainLookupStart;
-    sendPerfTiming("dnsLookupTime", dnsLookupTime);
+    logPerformance("dnsLookupTime", dnsLookupTime);
     dnsLookupTimeLogged = true;
   }
 
   // Time to first byte
   if (perfData.responseStart > 0 && !timeToFistByteLogged) {
     var timeToFistByte = perfData.responseStart - perfData.fetchStart;
-    sendPerfTiming("timeToFistByte", timeToFistByte);
+    logPerformance("timeToFistByte", timeToFistByte);
     timeToFistByteLogged = true;
   }
 
   // Time to download initial HTML page
   if (perfData.responseEnd > 0 && !timeToHtmlPageLogged) {
     var timeToHtmlPage = perfData.responseEnd - perfData.fetchStart;
-    sendPerfTiming("timeToHtmlPage", timeToHtmlPage);
+    logPerformance("timeToHtmlPage", timeToHtmlPage);
     timeToHtmlPageLogged = true;
   }
 
   // Time to interactive
   if (perfData.domInteractive > 0 && !domInteractiveLogged) {
     var domInteractive = perfData.domInteractive - perfData.navigationStart;
-    sendPerfTiming("domInteractive", domInteractive);
-    sendPerfTiming(
-      "domInteractiveFromFetchStart",
-      perfData.domInteractive - perfData.fetchStart
-    );
+    logPerformance("domInteractive", domInteractive);
     domInteractiveLogged = true;
   }
 
@@ -54,7 +59,7 @@ const checkTiming = () => {
     clearInterval(checkTimingsAvailable);
 
     var pageLoadTime = perfData.loadEventEnd - perfData.fetchStart;
-    sendPerfTiming("pageLoadTime", pageLoadTime);
+    logPerformance("pageLoadTime", pageLoadTime);
 
     // Static Asset load times
     var entries = window.performance.getEntries();
@@ -63,39 +68,44 @@ const checkTiming = () => {
       .filter(entry => {
         return (
           // filter out everything (including images) except css and js
-          entry.name.includes(".js") || entry.name.includes(".css")
+          (entry.name.includes(".js") || entry.name.includes(".css")) &&
+          // filter out anything that doesn't have greater than 0 startTime
+          entry.startTime > 0
         );
       })
-      .map((entry: PerformanceResourceTiming) => {
-        return {
+      .forEach((entry: PerformanceResourceTiming) => {
+        const event: AssetTiming = {
+          type: EventType.AssetLoadTime,
           protocol: entry.nextHopProtocol,
           asset: entry.name,
-          time:
-            entry.startTime > 0
-              ? Math.round(entry.responseEnd - entry.startTime)
-              : "0",
-          dns: Math.round(entry.domainLookupEnd - entry.domainLookupStart)
+          time: Math.round(entry.responseEnd - entry.startTime).toString(),
+          dns: Math.round(
+            entry.domainLookupEnd - entry.domainLookupStart
+          ).toString()
         };
+        logImage(event);
       });
-
-    logImage("asset-load-times", { assets: JSON.stringify(assetTiming) });
-
-    const paintTypes: { [key: string]: string } = {
-      "first-contentful-paint": "firstContentfulPaint",
-      "first-paint": "firstPaint"
-    };
 
     // paint timings
-    entries
-      .filter(function(entry) {
-        return entry.entryType === "paint";
-      })
-      .forEach(function(entry) {
-        sendPerfTiming(paintTypes[entry.name], entry.startTime);
-      });
+    entries.forEach(entry => {
+      if (entry.name === "first-contentful-paint") {
+        logPerformance("firstContentfulPaint", entry.startTime);
+      } else if (entry.name === "first-paint") {
+        logPerformance("firstPaint", entry.startTime);
+      }
+    });
   }
 };
 
-const checkTimingsAvailable = setInterval(checkTiming, 1000);
+var checkTimingsAvailable: NodeJS.Timeout;
+const checkForTimingAvailability = () => {
+  checkTimingsAvailable = setInterval(checkTiming, 1000);
+  checkTiming();
+};
 
-checkTiming();
+if ("requestIdleCallback" in window) {
+  // if browser has requestIdleCallback then let's wait for an idle period to do all this stuff
+  window.requestIdleCallback(checkForTimingAvailability);
+} else {
+  checkForTimingAvailability();
+}

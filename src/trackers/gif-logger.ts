@@ -1,4 +1,15 @@
-type EVENT_TYPE = "error" | "performance" | "ping" | "asset-load-times" | "fps";
+export const enum EventType {
+  Error = "error",
+  Performance = "performance",
+  Ping = "ping",
+  AssetLoadTime = "assetLoadTime",
+  Fps = "fps"
+}
+
+export type BasePerfEvent = {
+  [key: string]: string;
+  type: EventType;
+};
 
 export type RequestInfo = {
   rid: string;
@@ -7,7 +18,7 @@ export type RequestInfo = {
   clientTime: string;
 };
 
-type AppConfig = {
+export type AppConfig = {
   rid: string;
   vid: string;
   startTimestamp: number;
@@ -15,34 +26,62 @@ type AppConfig = {
   gifLoggerUrl: string;
 };
 
+type RequestIdleCallbackHandle = any;
+type RequestIdleCallbackOptions = {
+  timeout: number;
+};
+type RequestIdleCallbackDeadline = {
+  readonly didTimeout: boolean;
+  timeRemaining: (() => number);
+};
+
 declare global {
   interface Window {
     __APP_CONFIG__: AppConfig;
     perfMetrics: { onFirstInputDelay: Function };
     encodeURIComponent: Function;
+    requestIdleCallback: ((
+      callback: ((deadline: RequestIdleCallbackDeadline) => void),
+      opts?: RequestIdleCallbackOptions
+    ) => RequestIdleCallbackHandle);
+    cancelIdleCallback: ((handle: RequestIdleCallbackHandle) => void);
   }
 }
 
-const requestInfo: RequestInfo = {
-  rid: window.__APP_CONFIG__.rid,
-  vid: window.__APP_CONFIG__.vid,
-  startTimestamp: window.__APP_CONFIG__.startTimestamp.toString(),
-  clientTime: window.performance && window.performance.now().toString()
-};
+type FullEvent = BasePerfEvent & RequestInfo;
 
 export const logImage = (
-  type: EVENT_TYPE,
-  event: { [key: string]: string },
+  event: BasePerfEvent,
   url: string = window.__APP_CONFIG__.gifLoggerUrl
 ): void => {
-  const queryString = Object.keys({ ...requestInfo, ...event })
-    .map(
-      (key: string): string => {
-        return event[key];
-      }
-    )
-    .join("&");
+  const requestInfo: RequestInfo = {
+    rid: window.__APP_CONFIG__.rid,
+    vid: window.__APP_CONFIG__.vid,
+    startTimestamp: window.__APP_CONFIG__.startTimestamp.toString(),
+    clientTime: Math.round(
+      window.performance && window.performance.now()
+    ).toString()
+  };
 
-  // log our data with an image request
-  new Image().src = `${url}/${type}?${queryString}`;
+  const fullEvent: FullEvent = { ...requestInfo, ...event };
+
+  const log = () => {
+    const queryString = Object.keys(fullEvent)
+      .map(
+        (key: string): string => {
+          return `${key}=${window.encodeURIComponent(fullEvent[key])}`;
+        }
+      )
+      .join("&");
+
+    // log our data with an image request
+    new Image().src = `${url}?${queryString}`;
+  };
+
+  if ("requestIdleCallback" in window) {
+    // if browser has requestIdleCallback then let's wait for an idle period to log
+    window.requestIdleCallback(log);
+  } else {
+    log();
+  }
 };

@@ -1,16 +1,14 @@
 import { logImage } from "./gif-logger";
+import { EventType, BasePerfEvent } from "./gif-logger";
 
-export type Error = {
-  msg: string;
-};
-
-export type ErrorMessage = {
-  message: Event | string;
-  source?: string;
-  lineno?: number;
-  colno?: number;
-  error?: any;
-};
+export interface Error extends BasePerfEvent {
+  type: EventType.Error;
+  message: string;
+  source: string;
+  lineno: string;
+  colno: string;
+  error: string;
+}
 
 const maxErrorsToLog = 10;
 var i = 0;
@@ -26,19 +24,16 @@ export const logErrors = (
   if (i < maxErrorsToLog) {
     i++;
 
-    const ErrorToLog: Error = {
-      msg: window.btoa(
-        JSON.stringify({
-          message,
-          source,
-          lineno,
-          colno,
-          error
-        })
-      )
+    const event: Error = {
+      type: EventType.Error,
+      message: JSON.stringify(message) || "NA",
+      source: source || "NA",
+      lineno: (lineno && lineno.toString()) || "NA",
+      colno: (colno && colno.toString()) || "NA",
+      error: JSON.stringify(error) || "NA"
     };
 
-    logImage("error", ErrorToLog);
+    logImage(event);
   }
 
   var suppressErrorAlert = true;

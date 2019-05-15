@@ -1,21 +1,3 @@
-// module.exports = {
-//   entry: { "embed-in-head": "./src/head-embeds.ts" },
-//   module: {
-//     rules: [
-//       {
-//         test: /\.js|.ts$/,
-//         exclude: /(node_modules)/,
-//         use: {
-//           loader: "ts-loader"
-//         }
-//       }
-//     ]
-//   },
-//   resolve: {
-//     extensions: [".ts", ".js"]
-//   }
-// };
-
 module.exports = {
   entry: {
     perf: "./src/body-script.ts",

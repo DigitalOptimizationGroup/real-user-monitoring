@@ -1,14 +1,16 @@
-import { logImage } from "./gif-logger";
+import { logImage, EventType } from "./gif-logger";
 import { effectiveType } from "./network-type";
 
-export type ClientPing = {
+export type Ping = {
+  type: EventType.Ping;
   language: string;
   effectiveType: string;
 };
 
-const event: ClientPing = {
+const event: Ping = {
+  type: EventType.Ping,
   language: navigator.language,
   effectiveType
 };
 
-logImage("ping", event);
+logImage(event);
