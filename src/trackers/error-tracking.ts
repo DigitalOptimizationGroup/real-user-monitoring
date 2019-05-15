@@ -1,42 +1,48 @@
 import { logImage } from "./gif-logger";
 
-export type ERRORS = {
+export type Error = {
   msg: string;
+};
+
+export type ErrorMessage = {
+  message: Event | string;
+  source?: string;
+  lineno?: number;
+  colno?: number;
+  error?: any;
 };
 
 const maxErrorsToLog = 10;
 var i = 0;
+
 export const logErrors = (
-  msg: string,
-  url: string,
-  line: number,
-  col: number,
-  error: Error
-) => {
+  message: Event | string,
+  source?: string,
+  lineno?: number,
+  colno?: number,
+  error?: any
+): boolean => {
   // don't log more than i events per rid
   if (i < maxErrorsToLog) {
     i++;
 
-    const ErrorToLog: ERRORS = {
+    const ErrorToLog: Error = {
       msg: window.btoa(
         JSON.stringify({
-          type: "ERROR",
-          payload: {
-            msg: msg,
-            url: url,
-            line: line,
-            col: col,
-            error: error
-          }
+          message,
+          source,
+          lineno,
+          colno,
+          error
         })
       )
     };
 
     logImage("error", ErrorToLog);
-
-    var suppressErrorAlert = true;
-    return suppressErrorAlert;
   }
+
+  var suppressErrorAlert = true;
+  return suppressErrorAlert;
 };
 
 // catch and track errors

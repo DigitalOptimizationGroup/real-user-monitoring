@@ -1,4 +1,4 @@
-type EVENT_TYPE = "error" | "performance" | "ping" | "asset-load-times";
+type EVENT_TYPE = "error" | "performance" | "ping" | "asset-load-times" | "fps";
 
 export type RequestInfo = {
   rid: string;
