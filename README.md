@@ -21,6 +21,6 @@ The body should come from `dist/boyd.[chunkhash].js`
     </script>
 </head>
 <body>
-<script async src="/static/perf.dbbc8de4b1c582d7cc9a.js"></script>
+<script async src="/static/perf.[chunkhash].js"></script>
 </body>
 ```

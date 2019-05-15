@@ -23,7 +23,8 @@ const main = (now: number) => {
   const delta = now - start;
   if (delta >= 1000) {
     const normal = Math.round(fps / (delta / 1000));
-    if (priorFps !== normal) {
+    // we don't bother sending if fps >= 50
+    if (priorFps !== normal && fps < 50) {
       const event: Fps = {
         type: EventType.Fps,
         fps: fps.toString(),
