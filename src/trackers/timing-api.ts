@@ -3,7 +3,7 @@ import { logImage, BasePerfEvent } from "./gif-logger";
 import { EventType } from "./gif-logger";
 
 export interface AssetTiming extends BasePerfEvent {
-  type: EventType.AssetLoadTime;
+  type: EventType.AssetTiming;
   protocol: PerformanceResourceTiming["nextHopProtocol"];
   asset: PerformanceResourceTiming["name"];
   time: string;

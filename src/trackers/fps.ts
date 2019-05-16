@@ -13,9 +13,8 @@ var numEvents = 0;
 export type Fps = {
   type: EventType.Fps;
   fps: string;
-  normal: string;
   delta: string;
-  now: string;
+  clientTime: string;
 };
 
 const main = (now: number) => {
@@ -24,13 +23,12 @@ const main = (now: number) => {
   if (delta >= 1000) {
     const normal = Math.round(fps / (delta / 1000));
     // we don't bother sending if fps >= 50
-    if (priorFps !== normal && fps < 50) {
+    if (priorFps !== normal && normal < 50) {
       const event: Fps = {
         type: EventType.Fps,
-        fps: fps.toString(),
-        normal: normal.toString(),
+        fps: normal.toString(),
         delta: Math.round(delta).toString(),
-        now: Math.round(now).toString()
+        clientTime: Math.round(now).toString()
       };
       logImage(event);
       numEvents++;

@@ -1,8 +1,8 @@
 import { logImage } from "./gif-logger";
 import { EventType, BasePerfEvent } from "./gif-logger";
 
-export interface Error extends BasePerfEvent {
-  type: EventType.Error;
+export interface ErrorLog extends BasePerfEvent {
+  type: EventType.ErrorLog;
   message: string;
   source: string;
   lineno: string;
@@ -24,8 +24,8 @@ export const logErrors = (
   if (i < maxErrorsToLog) {
     i++;
 
-    const event: Error = {
-      type: EventType.Error,
+    const event: ErrorLog = {
+      type: EventType.ErrorLog,
       message: JSON.stringify(message) || "NA",
       source: source || "NA",
       lineno: (lineno && lineno.toString()) || "NA",

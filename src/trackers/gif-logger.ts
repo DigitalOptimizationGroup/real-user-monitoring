@@ -1,8 +1,8 @@
 export const enum EventType {
-  Error = "error",
-  Performance = "performance",
+  ErrorLog = "errorLog",
+  PerformanceTiming = "performanceTiming",
   Ping = "ping",
-  AssetLoadTime = "assetLoadTime",
+  AssetTiming = "assetTiming",
   Fps = "fps"
 }
 
@@ -15,7 +15,8 @@ export type RequestInfo = {
   rid: string;
   vid: string;
   startTimestamp: string;
-  clientTime: string;
+  elapsedTime: string;
+  projectId: string;
 };
 
 export type AppConfig = {
@@ -58,8 +59,9 @@ export const logImage = (
     rid: window.__APP_CONFIG__.rid,
     vid: window.__APP_CONFIG__.vid,
     startTimestamp: window.__APP_CONFIG__.startTimestamp.toString(),
-    clientTime: Math.round(
-      window.performance && window.performance.now()
+    projectId: window.__APP_CONFIG__.projectId,
+    elapsedTime: Math.round(
+      (window.performance && window.performance.now()) || Date.now()
     ).toString()
   };
 

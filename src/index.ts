@@ -1,6 +1,9 @@
-export { Error } from "./trackers/error-tracking";
-export { Performance } from "./trackers/log-performance";
+export { ErrorLog } from "./trackers/error-tracking";
+export {
+  PerformanceTiming,
+  PerformanceTimingProperty
+} from "./trackers/log-performance";
 export { Ping } from "./trackers/ping";
-export { RequestInfo } from "./trackers/gif-logger";
 export { Fps } from "./trackers/fps";
-export { AppConfig } from "./trackers/gif-logger";
+export { AppConfig, RequestInfo, EventType } from "./trackers/gif-logger";
+export { AssetTiming } from "./trackers/timing-api";
