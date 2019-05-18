@@ -6,7 +6,7 @@ export interface AssetTiming extends BasePerfEvent {
   type: EventType.AssetTiming;
   protocol: PerformanceResourceTiming["nextHopProtocol"];
   asset: PerformanceResourceTiming["name"];
-  time: string;
+  duration: string;
   dns: string;
 }
 
@@ -75,10 +75,10 @@ const checkTiming = () => {
       })
       .forEach((entry: PerformanceResourceTiming) => {
         const event: AssetTiming = {
-          type: EventType.AssetLoadTime,
+          type: EventType.AssetTiming,
           protocol: entry.nextHopProtocol,
           asset: entry.name,
-          time: Math.round(entry.responseEnd - entry.startTime).toString(),
+          duration: Math.round(entry.responseEnd - entry.startTime).toString(),
           dns: Math.round(
             entry.domainLookupEnd - entry.domainLookupStart
           ).toString()

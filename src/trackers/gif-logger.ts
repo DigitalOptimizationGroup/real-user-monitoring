@@ -3,11 +3,11 @@ export const enum EventType {
   PerformanceTiming = "performanceTiming",
   Ping = "ping",
   AssetTiming = "assetTiming",
-  Fps = "fps"
+  Fps = "fps",
+  LongTasksTiming = "longTasksTiming"
 }
 
 export type BasePerfEvent = {
-  [key: string]: string;
   type: EventType;
 };
 
@@ -17,6 +17,7 @@ export type RequestInfo = {
   startTimestamp: string;
   elapsedTime: string;
   projectId: string;
+  color: string;
 };
 
 export type AppConfig = {
@@ -25,6 +26,7 @@ export type AppConfig = {
   startTimestamp: number;
   projectId: string;
   gifLoggerUrl: string;
+  color: string;
 };
 
 type RequestIdleCallbackHandle = any;
@@ -36,6 +38,10 @@ type RequestIdleCallbackDeadline = {
   timeRemaining: (() => number);
 };
 
+class PerformanceObserver {
+  constructor(callback: Function) {}
+}
+
 declare global {
   interface Window {
     __APP_CONFIG__: AppConfig;
@@ -46,10 +52,11 @@ declare global {
       opts?: RequestIdleCallbackOptions
     ) => RequestIdleCallbackHandle);
     cancelIdleCallback: ((handle: RequestIdleCallbackHandle) => void);
+    PerformanceLongTaskTiming: Function;
+    PerformanceObserver: typeof PerformanceObserver;
+    __tti: {};
   }
 }
-
-type FullEvent = BasePerfEvent & RequestInfo;
 
 export const logImage = (
   event: BasePerfEvent,
@@ -62,10 +69,11 @@ export const logImage = (
     projectId: window.__APP_CONFIG__.projectId,
     elapsedTime: Math.round(
       (window.performance && window.performance.now()) || Date.now()
-    ).toString()
+    ).toString(),
+    color: window.__APP_CONFIG__.color || "NA"
   };
 
-  const fullEvent: FullEvent = { ...requestInfo, ...event };
+  const fullEvent: { [key: string]: string } = { ...requestInfo, ...event };
 
   const log = () => {
     const queryString = Object.keys(fullEvent)
