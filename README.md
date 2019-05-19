@@ -1,4 +1,4 @@
-# Real User Performance Monitoring
+# Real User Performance Monitoring - Developer Preview
 
 This library has been designed to work with Digital Optimization Group's Application Delivery Network. It can be automatically added to your application running on our network.
 
