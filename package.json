@@ -1,11 +1,11 @@
 {
   "name": "@digitaloptgroup/rum",
-  "version": "0.0.1-alpha-01",
+  "version": "0.0.1-dev-preview-03",
   "description": "Real world performance monitoring",
-  "main": "src/body-script.js",
+  "main": "dist/bundled-scripts.js",
   "scripts": {
     "test": "jest --watch --verbose",
-    "build": "rm dist/head* || true && rm dist/perf* || true && webpack"
+    "build": "rm dist/head* || true && rm dist/perf* || true && rm dist/bundled-scripts.js || true && webpack && node bundle-scripts.js"
   },
   "author": "Digital Optimization Group LLC",
   "license": "MIT",
@@ -27,5 +27,9 @@
     "mock-raf": "^1.0.1",
     "tti-polyfill": "^0.2.2"
   },
-  "typings": "src/index.d.ts"
+  "typings": "src/index.d.ts",
+  "sideEffects": false,
+  "files": [
+    "/dist"
+  ]
 }

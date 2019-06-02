@@ -18,6 +18,6 @@ module.exports = {
     extensions: [".ts", ".js"]
   },
   output: {
-    filename: "[name].[chunkhash].js"
+    filename: "[name].js"
   }
 };
